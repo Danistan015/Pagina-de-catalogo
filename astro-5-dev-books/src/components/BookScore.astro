@@ -1,0 +1,37 @@
+---
+const { title } = Astro.props;
+
+const query = `
+  query ($search: String) {
+    Media(search: $search, type: ANIME) {
+      title {
+        romaji
+      }
+      averageScore
+    }
+  }
+`;
+
+const res = await fetch("https://graphql.anilist.co", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  },
+  body: JSON.stringify({
+    query,
+    variables: { search: title }
+  })
+});
+
+let scoreValue = null;
+
+if (res.ok) {
+  const json = await res.json();
+  scoreValue = json.data?.Media?.averageScore;
+}
+---
+
+<span class="text-xs text-yellow-400" id="score">
+  ⭐ Puntuación: {scoreValue ? `${scoreValue}/100` : "No disponible"}
+</span>
